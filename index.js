@@ -22,6 +22,13 @@ app.get('/products', async (req, res) => {
 
 })
 
+app.get('/products/:id', async (req, res) => {
+    const { id } = req.params
+    const product = await Product.findById(id)
+    console.log(product)
+    res.render('products/show', { product })
+})
+
 app.listen(3000, () => {
     console.log("Listening to port 3000")
 })
