@@ -3,8 +3,7 @@ const app = express();
 const path = require('path');
 const mongoose = require('mongoose');
 
-
-mongoose.connect('mongodb://localhost:27017/moviesDB', { useNewUrlParser: true })
+mongoose.connect('mongodb://localhost:27017/farmdb', { useNewUrlParser: true })
     .then(() => {
         console.log("Connected to database...")
     })
