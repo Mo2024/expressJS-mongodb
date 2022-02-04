@@ -4,10 +4,11 @@ const path = require('path');
 const mongoose = require('mongoose');
 const Product = require('./models/product');
 const methodOverride = require('method-override')
+const Farm = require('./models/farms')
 
 const categories = ['fruit', 'vegetable', 'dairy'];
 
-mongoose.connect('mongodb://localhost:27017/farmdb', { useNewUrlParser: true })
+mongoose.connect('mongodb://localhost:27017/farmdb2', { useNewUrlParser: true })
     .then(() => {
         console.log("Connected to database...")
     })
@@ -20,11 +21,50 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 
+//Farm routes
+app.get('/farms', async (req, res) => {
+    const farms = await Farm.find({});
+    res.render('farms/index', { farms })
+})
 
+app.get('/farms/new', (req, res) => {
+    res.render('farms/new')
+})
+app.get('/farms/:id', async (req, res) => {
+    const farm = await Farm.findById(req.params.id).populate('products');
+    res.render('farms/show', { farm })
+})
+
+app.post('/farms', async (req, res) => {
+    const farm = new Farm(req.body);
+    await farm.save();
+    res.redirect('/farms')
+})
+app.get('/farms/:id/products/new', (req, res) => {
+    const { id } = req.params;
+    res.render('products/new', { categories, id })
+})
+app.post('/farms/:id/products', async (req, res) => {
+    const { id } = req.params;
+    const farm = await Farm.findById(id);
+    console.log(farm)
+    const { name, price, category } = req.body;
+    const product = new Product({ name, price, category });
+    farm.products.push(product);
+    product.farm = farm;
+    product.save();
+    farm.save();
+    res.redirect(`/farms/${farm._id}`)
+})
+
+app.delete('/farms/:id', async (req, res) => {
+    const farm = await Farm.findByIdAndDelete(req.params.id);
+    res.redirect('/farms')
+})
+//Product routes
 app.get('/products/new', (req, res) => {
     res.render('products/new', { categories })
 })
-
 
 app.get('/products', async (req, res) => {
 
